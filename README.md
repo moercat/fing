@@ -27,7 +27,7 @@ Simple architecture, clear directory structure, giving users an unusual feeling
 
 本项目已经预先实现了一些常用的代码方便参考和复用:
 
-1. 用户模型 pkg/entity/usr/user.go
+1. 用户模型 ```pkg/entity/usr/user.go```
 2. 实现了```/api/v1/register```用户注册接口
 3. 实现了```/api/v1/login```用户登录接口
 
@@ -38,40 +38,39 @@ Simple architecture, clear directory structure, giving users an unusual feeling
 
 本项目已经预先创建了一系列文件夹划分出下列模块:
 
-1. **internal** 文件夹就是每一个项目的业务层所在区域，所有业务都实现在该文件夹内
+1. ```internal``` 文件夹就是每一个项目的业务层所在区域，所有业务都实现在该文件夹内
 
-   1.**apis** 文件夹就是接口文件位置，相当于其他框架中的controller，所有接口接参都实现在该文件夹内，每个模块单独一个文件夹，避免不同模块耦合度过高
+   1.```apis``` 文件夹就是接口文件位置，相当于其他框架中的controller，所有接口接参都实现在该文件夹内，每个模块单独一个文件夹，避免不同模块耦合度过高
 
-   2.**model** 文件夹就是模型文件位置，所有接参模型与返回模型都实现在该文件夹内，实现与业务代码的解耦
+   2.```model``` 文件夹就是模型文件位置，所有接参模型与返回模型都实现在该文件夹内，实现与业务代码的解耦
 
-   3.**service** 文件夹就是业务文件位置，所有业务逻辑都实现在该文件夹内，每个模块单独一个文件夹，避免不同模块耦合度过高
+   3.```service``` 文件夹就是业务文件位置，所有业务逻辑都实现在该文件夹内，每个模块单独一个文件夹，避免不同模块耦合度过高
 
-   4.**tools** 文件夹就是工具文件位置，当前项目业务内使用的工具文件
+   4.```tools``` 文件夹就是工具文件位置，当前项目业务内使用的工具文件
 
-2. **log** 文件夹负责日志记录，与之后可扩充的业务监控与其他流程追踪业务
+2. ```log``` 文件夹负责日志记录，与之后可扩充的业务监控与其他流程追踪业务
 
-3. **pkg** 文件夹实现所有项目的功能、中间件、定时任务、数据库链接等等
+3. ```pkg``` 文件夹实现所有项目的功能、中间件、定时任务、数据库链接等等
 
-   1.**cobra** 文件夹就是定时任务文件位置，通过 time.NewTicker 实现定时任务功能
+   1.```cobra``` 文件夹就是定时任务文件位置，通过 time.NewTicker 实现定时任务功能
 
-   2.**config** 文件夹就是配置文件位置，通过 configor 来获取 yaml 配置文件中的文件
+   2.```config``` 文件夹就是配置文件位置，通过 configor 来获取 yaml 配置文件中的文件
 
-   3.**db** 文件夹就是数据库文件位置，gorm、xorm、redis、es 等数据库链接初始化
+   3.```db``` 文件夹就是数据库文件位置，gorm、xorm、redis、es 等数据库链接初始化
 
-   4.**elastic** 文件夹就是 es 操作文件位置，简单实现es 中用户的增删改查功能
+   4.```elastic``` 文件夹就是 es 操作文件位置，简单实现es 中用户的增删改查功能
 
-   5.**email** 文件夹就是 gomail 的实现文件位置，通过 gomail 实现邮件的发送
+   5.```email``` 文件夹就是 gomail 的实现文件位置，通过 gomail 实现邮件的发送
 
-   6.**entity** 文件夹就是数据库实体文件位置，通过每一个数据库一个文件夹来清晰化项目结构
+   6.```entity``` 文件夹就是数据库实体文件位置，通过每一个数据库一个文件夹来清晰化项目结构
 
-   7.**middleware** 文件夹就是中间件文件位置，cors 跨域、session、recover 错误捕获、auth 登陆验证
+   7.```middleware``` 文件夹就是中间件文件位置，cors 跨域、session、recover 错误捕获、auth 登陆验证
 
-   8.**resp** 文件夹就是自定义返回结构文件位置，实现通用成功返回、失败返回、分页返回、错误校验
+   8.```resp``` 文件夹就是自定义返回结构文件位置，实现通用成功返回、失败返回、分页返回、错误校验
 
 ## Configor
 
-项目在启动的时候依赖于 configor，根据环境变量加载配置文件 使用CONFIGOR_ENV 设置环境变量， 如果 CONFIGOR_ENV 没有设置，框架将会使用 development 作为默认环境变量，也就是 读取 **
-config.development.yaml**
+项目在启动的时候依赖于 ```configor```，根据环境变量加载配置文件 使用CONFIGOR_ENV 设置环境变量， 如果 CONFIGOR_ENV 没有设置，框架将会使用 development 作为默认环境变量，也就是 读取 ```config.development.yaml```
 
 如果我们要区分开发环境与生产环境，通过下方命令实现读取 **config.production.yaml**
 `
@@ -116,6 +115,14 @@ go run main.go
 
 ```shell
 go run main.go
+```
+
+## 部署
+
+***linux***
+
+```shell
+GOOS=linux GOARCH=amd64 go build -o admin
 ```
 
 项目运行后启动在9765端口（可以修改，参考gin文档)
