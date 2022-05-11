@@ -4,6 +4,14 @@ Simple architecture, clear directory structure, giving users an unusual feeling
 
 简单的架构，清晰的目录结构，带给使用者非一般的感觉
 
+![example](https://img.shields.io/badge/Go-1.16-blue)
+![example](https://img.shields.io/badge/Gin%20-1.7.1-lightgrey)
+![example](https://img.shields.io/badge/Redis-go--redis-red)
+![example](https://img.shields.io/badge/Gorm%20-gorm.io-red)
+![example](https://img.shields.io/badge/Xorm%20-xorm.io-red)
+![example](https://img.shields.io/badge/Elastic-olivere-blue)
+![example](https://img.shields.io/badge/License-MIT-green)
+
 ## 目的
 
 本项目采用了一系列Golang中比较流行的组件，可以以本项目为基础快速搭建Restful Web API
