@@ -13,13 +13,17 @@ func init() {
 		log.Fatalf("配置加载错误: %v", err)
 	}
 
+	// 验证配置的有效性
+	if err := ValidateConfig(); err != nil {
+		log.Fatalf("配置验证失败: %v", err)
+	}
 }
 
 var Config = struct {
-	Mode    string `yaml:"mode" default:"debug"`
-	Secret  string `yaml:"secret" default:"djaod"`
-	Level   int    `yaml:"level" default:"4"`
-	Port    string `yaml:"port" required:"true"`
+	Mode   string `yaml:"mode" default:"debug"`
+	Secret string `yaml:"secret" default:"djaod"`
+	Level  int    `yaml:"level" default:"4"`
+	Port   string `yaml:"port" required:"true"`
 
 	DataSource struct {
 		Main string `yaml:"main" required:"true"`

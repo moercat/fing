@@ -1,6 +1,7 @@
 package resp
 
 import (
+	"fing/pkg/errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -15,20 +16,37 @@ type pageResp struct {
 
 // 失败数据处理
 func Fail(c *gin.Context, err error, msg string, code ...int) {
+	responseCode := 500
+	if len(code) != 0 {
+		responseCode = code[0]
+	}
+
+	// 如果是APIError类型，使用其中的代码
+	if apiErr, ok := err.(*errors.APIError); ok {
+		responseCode = apiErr.Code
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"code": func() int {
-			if len(code) != 0 {
-				return code[0]
-			}
-			return 500
-		}(),
+		"code": responseCode,
 		"data": nil,
 		"msg": func() string {
 			if msg != "" {
 				return msg
 			}
-			return err.Error()
+			if err != nil {
+				return err.Error()
+			}
+			return "未知错误"
 		}(),
+	})
+}
+
+// 失败数据处理（基于APIError）
+func FailWithError(c *gin.Context, apiErr *errors.APIError) {
+	c.JSON(http.StatusOK, gin.H{
+		"code": apiErr.Code,
+		"data": nil,
+		"msg":  apiErr.Message,
 	})
 }
 

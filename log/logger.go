@@ -1,75 +1,77 @@
-package log
+package logger
 
 import (
-	"fing/pkg/config"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
-const (
-	LevelError         = iota // LevelError 错误
-	LevelWarning              // LevelWarning 警告
-	LevelInformational        // LevelInformational 提示
-	LevelDebug                // LevelDebug 除错
+var (
+	InfoLogger  *log.Logger
+	WarnLogger  *log.Logger
+	ErrorLogger *log.Logger
+	DebugLogger *log.Logger
 )
 
-var logger = &Logger{
-	level: config.Config.Level,
-}
-
-// Logger 日志
-type Logger struct {
-	level int
-}
-
-// Println 打印
-func (ll *Logger) Println(msg string) {
-	fmt.Printf("%s %s", time.Now().In(time.Local).Format("2006-01-02 15:04:05"), msg)
-}
-
-// Panic 极端错误
-func Panic(format string, v ...interface{}) {
-	if LevelError > logger.level {
-		return
+func init() {
+	logDir := "./log"
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		os.MkdirAll(logDir, 0755)
 	}
-	msg := fmt.Sprintf("[Panic] "+format+" \n", v...)
-	logger.Println(msg)
-	os.Exit(0)
+
+	fileName := filepath.Join(logDir, fmt.Sprintf("app-%s.log", time.Now().Format("2006-01-02")))
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Failed to open log file:", err)
+	}
+
+	multiWriter := io.MultiWriter(file, os.Stdout)
+
+	InfoLogger = log.New(multiWriter, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarnLogger = log.New(multiWriter, "WARN: ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(multiWriter, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	DebugLogger = log.New(multiWriter, "DEBUG: ", log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-// Error 错误
-func Error(format string, v ...interface{}) {
-	if LevelError > logger.level {
-		return
-	}
-	msg := fmt.Sprintf("[E] "+format+" \n", v...)
-	logger.Println(msg)
+// Info 记录信息日志
+func Info(v ...interface{}) {
+	InfoLogger.Output(2, fmt.Sprint(v...))
 }
 
-// Warning 警告
-func Warning(format string, v ...interface{}) {
-	if LevelWarning > logger.level {
-		return
-	}
-	msg := fmt.Sprintf("[W] "+format+" \n", v...)
-	logger.Println(msg)
+// Infof 记录格式化信息日志
+func Infof(format string, v ...interface{}) {
+	InfoLogger.Output(2, fmt.Sprintf(format, v...))
 }
 
-// Info 信息
-func Info(format string, v ...interface{}) {
-	if LevelInformational > logger.level {
-		return
-	}
-	msg := fmt.Sprintf("[I] "+format+" \n", v...)
-	logger.Println(msg)
+// Warn 记录警告日志
+func Warn(v ...interface{}) {
+	WarnLogger.Output(2, fmt.Sprint(v...))
 }
 
-// Debug 校验
-func Debug(format string, v ...interface{}) {
-	if LevelDebug > logger.level {
-		return
-	}
-	msg := fmt.Sprintf("[D] "+format+" \n", v...)
-	logger.Println(msg)
+// Warnf 记录格式化警告日志
+func Warnf(format string, v ...interface{}) {
+	WarnLogger.Output(2, fmt.Sprintf(format, v...))
+}
+
+// Error 记录错误日志
+func Error(v ...interface{}) {
+	ErrorLogger.Output(2, fmt.Sprint(v...))
+}
+
+// Errorf 记录格式化错误日志
+func Errorf(format string, v ...interface{}) {
+	ErrorLogger.Output(2, fmt.Sprintf(format, v...))
+}
+
+// Debug 记录调试日志
+func Debug(v ...interface{}) {
+	DebugLogger.Output(2, fmt.Sprint(v...))
+}
+
+// Debugf 记录格式化调试日志
+func Debugf(format string, v ...interface{}) {
+	DebugLogger.Output(2, fmt.Sprintf(format, v...))
 }

@@ -13,12 +13,15 @@ import (
 func (r *RouterLogin) register(c *gin.Context) {
 	var sv model.Register
 	if err := c.ShouldBind(&sv); err != nil {
-		resp.Fail(c, err, "")
+		resp.Fail(c, err, "参数错误")
 		return
 	}
 
 	err := login.Register(&sv)
-	resp.CkFail(500, err)
+	if err != nil {
+		resp.Fail(c, err, "")
+		return
+	}
 
 	resp.OK(c, nil, "")
 }
@@ -26,20 +29,23 @@ func (r *RouterLogin) register(c *gin.Context) {
 // login 用户登录接口
 func (r *RouterLogin) login(c *gin.Context) {
 	var sv model.Login
-	if err := c.ShouldBind(&sv); err == nil {
-		resp.Fail(c, err, "")
+	if err := c.ShouldBind(&sv); err != nil {
+		resp.Fail(c, err, "参数错误")
 		return
 	}
 
 	usr, err := login.Login(&sv)
-	resp.CkFail(500, err)
+	if err != nil {
+		resp.Fail(c, err, "")
+		return
+	}
 
 	s := sessions.Default(c)
 	s.Clear()
 	s.Set("user_id", usr.ID)
 	err = s.Save()
 	if err != nil {
-		resp.Fail(c, err, "")
+		resp.Fail(c, err, "登录失败")
 		return
 	}
 
