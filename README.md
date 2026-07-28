@@ -4,13 +4,14 @@ Simple architecture, clear directory structure, giving users an unusual feeling
 
 简单的架构，清晰的目录结构，带给使用者非一般的感觉
 
-![example](https://img.shields.io/badge/Go-1.16-blue)
-![example](https://img.shields.io/badge/Gin%20-1.7.1-lightgrey)
-![example](https://img.shields.io/badge/Redis-go--redis-red)
-![example](https://img.shields.io/badge/Gorm%20-gorm.io-red)
-![example](https://img.shields.io/badge/Xorm%20-xorm.io-red)
-![example](https://img.shields.io/badge/Elastic-olivere-blue)
-![example](https://img.shields.io/badge/License-MIT-green)
+![Go Version](https://img.shields.io/badge/Go-1.22-blue)
+![Gin](https://img.shields.io/badge/Gin-1.10-lightgrey)
+![Redis](https://img.shields.io/badge/Redis-go--redis-red)
+![Gorm](https://img.shields.io/badge/Gorm-gorm.io-red)
+![Xorm](https://img.shields.io/badge/Xorm-xorm.io-red)
+![Elastic](https://img.shields.io/badge/Elastic-olivere-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+[![CI](https://github.com/moercat/fing/actions/workflows/go.yml/badge.svg)](https://github.com/moercat/fing/actions/workflows/go.yml)
 
 ## 项目介绍
 
