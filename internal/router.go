@@ -9,6 +9,8 @@ import (
 	"fing/pkg/health"
 	"fing/pkg/middleware"
 	"fing/pkg/swagger"
+	"time"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,14 +21,14 @@ func InitRouter(r *gin.Engine) *gin.Engine {
 
 	// 全局中间件（顺序重要）
 	r.Use(
-		middleware.TraceID(),                 // 1. 每个请求分配 TraceID
-		middleware.RateLimit(100, 1<<63-1),  // 2. IP 限流（默认关闭，main.go 配置）
-		middleware.LoggerToFile(),           // 3. 请求日志
-		middleware.Session(),                // 4. Session
-		middleware.Cover,                    // 5. Panic 恢复
-		middleware.Cors(),                   // 6. CORS
-		middleware.Audit(),                  // 7. 操作日志（审计）
-		middleware.CurrentUser(),            // 8. 当前用户
+		middleware.TraceID(),       // 1. 每个请求分配 TraceID
+		middleware.RateLimit(100, time.Minute), // 2. IP 限流（默认每 IP 每分钟 100 次）
+		middleware.LoggerToFile(),  // 3. 请求日志
+		middleware.Session(),       // 4. Session
+		middleware.Cover,           // 5. Panic 恢复
+		middleware.Cors(),          // 6. CORS
+		middleware.Audit(),         // 7. 操作日志（审计）
+		middleware.CurrentUser(),   // 8. 当前用户
 	)
 
 	// 日常业务路由

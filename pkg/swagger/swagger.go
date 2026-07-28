@@ -1,10 +1,13 @@
 // Package swagger 提供 Swagger UI 集成。
 //
 // 用法：
-//   1. 在 API handler 上写 swag 注释
-//   2. swag init 生成 docs/
-//   3. main.go 加 swagger.Register(r)
+//   1. 在 API handler 上写 swag 注释（参考 examples/）
+//   2. 安装 swag CLI: go install github.com/swaggo/swag/cmd/swag@latest
+//   3. 生成文档: swag init -g main.go -o docs/
 //   4. 访问 http://localhost:9765/swagger/index.html
+//
+// 注意：docs/docs.go 是 swag 生成的占位 stub，路径全空。
+// 真实部署前必须先跑 swag init，否则 API 文档里看不到接口。
 //
 // handler 注释示例：
 //
@@ -22,7 +25,7 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	// 触发 swag init 生成的 docs 包（如果没有会编译报错，先放占位）
+	// docs 包由 swag init 自动生成
 	_ "fing/docs"
 )
 

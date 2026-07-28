@@ -72,7 +72,20 @@ func autoMigrate() {
 
 // registerTasks 注册业务定时任务。
 func registerTasks() {
+	// 每 30 分钟清理过期的密码重置 token
 	cobra.Register("cleanup-expired-tokens", 30*time.Minute, func() {
-		logger.Info("[task] cleanup expired tokens (skeleton, implement me)")
+		now := time.Now().Unix()
+		// 只清空 reset_token 和 reset_expires，保留用户记录
+		res := db.Gain.Model(&usr.UserInfo{}).
+			Where("reset_token <> ? AND reset_expires > 0 AND reset_expires < ?", "", now).
+			Updates(map[string]interface{}{
+				"reset_token":   "",
+				"reset_expires": 0,
+			})
+		if res.Error != nil {
+			logger.Errorf("[task] cleanup expired tokens failed: %v", res.Error)
+			return
+		}
+		logger.Infof("[task] cleaned %d expired reset tokens", res.RowsAffected)
 	})
 }
