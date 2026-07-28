@@ -15,7 +15,7 @@
 
 适合做：
 - 个人/中小团队的 Web 后端基座
-- 学习 Gin + GORM 的工程模板
+- **学习 Gin + GORM + Redis 的工程模板**（见 [TUTORIAL.md](TUTORIAL.md)）
 - 面试展示项目（覆盖常见后端能力）
 
 ## 功能特性
@@ -44,7 +44,11 @@
 
 ## 快速开始
 
-### Docker 一键运行
+### 0. 推荐：先看 [TUTORIAL.md](TUTORIAL.md) 学习路径
+
+8 步学会 Go 后端开发。跟着教程走 1-2 天能自己写后端。
+
+### 1. Docker 一键运行
 
 ```bash
 # 1. 启动 MySQL + Redis
@@ -146,9 +150,18 @@ fing/
 ├── docker-compose.yml
 ├── Makefile
 ├── APIDOC.md               ← 接口详情
-├── examples/               ← 客户端示例
+├── TUTORIAL.md             ← 后端开发教程（8 步学会）
+├── examples/               ← 学习示例（每个文件 `//go:build ignore`，go run 直接跑）
 │   ├── curl.sh             ← cURL 调用示例
-│   └── client.go           ← Go client 示例
+│   ├── client.go           ← Go client 示例
+│   ├── task/               ← 定时任务示例
+│   │   └── daily_stats.go  ← 3 个注册式定时任务
+│   ├── db/                 ← 数据库示例
+│   │   ├── mysql_gorm.go   ← GORM CRUD / 事务 / 批量
+│   │   ├── mysql_xorm.go   ← XORM 备选
+│   │   └── redis_basic.go  ← Redis 5 种数据结构 + 分布式锁 + 缓存模式
+│   └── email/              ← 邮件示例
+│       └── send.go         ← 文本 / HTML / 批量
 ├── log/                    ← 自定义 logger
 └── internal/
     ├── router.go           ← 路由注册
@@ -172,7 +185,7 @@ fing/
     ├── config/             ← 配置加载
     ├── entity/usr/         ← 数据模型
     ├── health/             ← 健康检查
-    └── cobra/              ← 定时任务
+    └── cobra/              ← 定时任务（注册式）
 ```
 
 ## 配置

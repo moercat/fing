@@ -1,3 +1,6 @@
+//go:build ignore
+// +build ignore
+
 // Package main 演示 fing 服务端的 Go 客户端调用方式。
 //
 // 运行：go run examples/client.go
