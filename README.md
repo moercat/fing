@@ -4,7 +4,7 @@ Simple architecture, clear directory structure, giving users an unusual feeling
 
 简单的架构，清晰的目录结构，带给使用者非一般的感觉
 
-![Go Version](https://img.shields.io/badge/Go-1.22-blue)
+![Go Version](https://img.shields.io/badge/Go-1.21-blue)
 ![Gin](https://img.shields.io/badge/Gin-1.10-lightgrey)
 ![Redis](https://img.shields.io/badge/Redis-go--redis-red)
 ![Gorm](https://img.shields.io/badge/Gorm-gorm.io-red)
