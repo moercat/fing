@@ -1,0 +1,49 @@
+name: Release
+
+# 触发：推送 v* tag（如 v1.0.0 / v1.2.3）
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Run tests
+        run: |
+          go mod download
+          go vet ./...
+          go test ./...
+
+      - name: Run goreleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # ghcr.io 认证：用同一个 GITHUB_TOKEN
+          DOCKER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ fing ${{ github.ref_name }} released"
+          echo "  https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}"

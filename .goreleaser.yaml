@@ -1,0 +1,111 @@
+# fing goreleaser 配置
+# 用法：
+#   goreleaser release --snapshot --clean   本地试发布
+#   git tag v1.0.0 && git push --tags       触发 GitHub Actions 自动发布
+project_name: fing
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: fing
+    main: ./
+    binary: fing
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: fing
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+      - zip
+    files:
+      - README.md
+      - LICENSE.md
+      - config.*.yaml
+      - .env.example
+
+dockers:
+  - id: fing-amd64
+    use: buildx
+    goos: linux
+    goarch: amd64
+    dockerfile: Dockerfile
+    image_templates:
+      - "ghcr.io/moercat/fing:{{ .Version }}-amd64"
+      - "ghcr.io/moercat/fing:latest-amd64"
+    skip_push: false
+    extra_files:
+      - config.docker.yaml
+      - .env.example
+
+  - id: fing-arm64
+    use: buildx
+    goos: linux
+    goarch: arm64
+    dockerfile: Dockerfile
+    image_templates:
+      - "ghcr.io/moercat/fing:{{ .Version }}-arm64"
+      - "ghcr.io/moercat/fing:latest-arm64"
+    skip_push: false
+
+docker_manifests:
+  - name_template: "ghcr.io/moercat/fing:{{ .Version }}"
+    image_templates:
+      - "ghcr.io/moercat/fing:{{ .Version }}-amd64"
+      - "ghcr.io/moercat/fing:{{ .Version }}-arm64"
+  - name_template: "ghcr.io/moercat/fing:latest"
+    image_templates:
+      - "ghcr.io/moercat/fing:latest-amd64"
+      - "ghcr.io/moercat/fing:latest-arm64"
+
+release:
+  github:
+    owner: moercat
+    name: fing
+  prerelease: auto
+  draft: false
+  header: |
+    ## fing {{ .Tag }}
+
+    用户中心后端脚手架。
+    详细用法见 [README](https://github.com/moercat/fing#readme)。
+
+    ## Docker
+    ```bash
+    docker pull ghcr.io/moercat/fing:{{ .Version }}
+    ```
+  footer: |
+    **Full Changelog**: https://github.com/moercat/fing/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+changelog:
+  use: git
+  groups:
+    - title: Breaking Changes
+      regexp: '^.*!:\s.+$'
+      order: 0
+    - title: Features
+      regexp: '^.*feat(\(.+\))?\s*:\s.+$'
+      order: 1
+    - title: Bug Fixes
+      regexp: '^.*fix(\(.+\))?\s*:\s.+$'
+      order: 2
+    - title: Others
+      order: 999
+
+snapshot:
+  name_template: "{{ .Tag }}-next"
