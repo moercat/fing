@@ -1,21 +1,26 @@
+# fing 本地开发配置
+# 对应 docker-compose 默认值（fing:fingpass@localhost:3306/fing）
+# 启动 fing-app 时用 CONFIGOR_ENV=development 加载此文件
+# （默认 dev 模式，直接 go run main.go 也行）
+
 mode: dev
-secret: asdasggas
+secret: dev-secret-please-change-in-production-min-32-chars
 level: 4
 port: 9765
 
 dataSource:
-  main: you_name:you_password@tcp(you_ip:you_port)/db_name?charset=utf8mb4
+  main: fing:fingpass@tcp(localhost:3306)/fing?charset=utf8mb4&parseTime=True&loc=Local
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: localhost:6379
 
 es:
-  esUrl: you_es
+  esUrl: ""
   esUsername: ""
   esPassword: ""
 
 email:
-  host: smtp.exmail.qq.com
-  name: my_name
-  email: my_email
+  host: smtp.gmail.com
+  name: "fing Dev"
+  email: dev@example.com
   password: ""

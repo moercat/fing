@@ -26,6 +26,12 @@
 ```bash
 git clone https://github.com/<you>/fing.git myapp
 cd myapp
+bash scripts/quickstart.sh   # 一键拉起 + 验证
+```
+
+或手动：
+
+```bash
 cp .env.example .env
 docker compose up -d
 curl http://localhost:9765/health

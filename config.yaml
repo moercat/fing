@@ -1,21 +1,24 @@
+# fing 默认配置（无环境变量时用）
+# 推荐用 config.development.yaml 或 config.docker.yaml
+
 mode: dev
-secret: asdasggas
+secret: dev-secret-please-change-in-production-min-32-chars
 level: 4
 port: 9765
 
 dataSource:
-  main: you_name:you_password@tcp(you_ip:you_port)/db_name?charset=utf8mb4
+  main: fing:fingpass@tcp(localhost:3306)/fing?charset=utf8mb4&parseTime=True&loc=Local
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: localhost:6379
 
 es:
-  esUrl: you_es
+  esUrl: ""
   esUsername: ""
   esPassword: ""
 
 email:
-  host: smtp.exmail.qq.com
-  name: my_name
-  email: my_email
+  host: smtp.gmail.com
+  name: "fing"
+  email: noreply@example.com
   password: ""

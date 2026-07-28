@@ -1,21 +1,25 @@
-mode: dev
-secret: asdasggas
+# fing 生产配置模板
+# 用法：CONFIGOR_ENV=production go run main.go
+# 生产环境务必改 secret / 数据库密码 / Redis 密码
+
+mode: prod
+secret: CHANGE_ME_TO_A_LONG_RANDOM_STRING_AT_LEAST_32_CHARS
 level: 4
 port: 9765
 
 dataSource:
-  main: you_name:you_password@tcp(you_ip:you_port)/db_name?charset=utf8mb4
+  main: REPLACE_WITH_PROD_MYSQL_DSN
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: REPLACE_WITH_PROD_REDIS_ADDR
 
 es:
-  esUrl: you_es
+  esUrl: ""
   esUsername: ""
   esPassword: ""
 
 email:
-  host: smtp.exmail.qq.com
-  name: my_name
-  email: my_email
+  host: smtp.gmail.com
+  name: "fing"
+  email: noreply@your-domain.com
   password: ""
