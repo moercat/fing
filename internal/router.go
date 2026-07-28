@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fing/internal/apis/login"
+	"fing/internal/apis/notify"
 	"fing/internal/apis/password"
 	"fing/internal/apis/upload"
 	"fing/internal/apis/user"
@@ -43,4 +44,5 @@ func normalRouter(r *gin.Engine) {
 	new(user.RouterUser).Router(r)
 	new(password.RouterPassword).Router(r)
 	new(upload.RouterUpload).Router(r)
+	new(notify.RouterNotify).Router(r)
 }
