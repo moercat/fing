@@ -1,47 +1,74 @@
 version: '3.8'
 
+# fing 一键启动：MySQL + Redis + fing-app
+# 用法：cp .env.example .env && docker compose up -d
+#
+# 启动后访问 http://localhost:9765/health 验证
+
 services:
-  app:
+  fing:
     build: .
+    image: fing/fing:latest
+    container_name: fing
+    restart: unless-stopped
     ports:
       - "9765:9765"
     environment:
-      - CONFIGOR_ENV=production
+      - CONFIGOR_ENV=docker
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - app-network
+      - fing-net
 
-  db:
+  mysql:
     image: mysql:8.0
+    container_name: fing-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-fing}
+      MYSQL_USER: ${MYSQL_USER:-fing}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-fingpass}
     ports:
       - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: fing_db
-      MYSQL_USER: fing_user
-      MYSQL_PASSWORD: fing_password
     volumes:
       - mysql_data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
-      - app-network
+      - fing-net
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
+    container_name: fing-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
-      - app-network
+      - fing-net
 
 volumes:
   mysql_data:
   redis_data:
 
 networks:
-  app-network:
+  fing-net:
     driver: bridge

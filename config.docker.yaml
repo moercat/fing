@@ -1,0 +1,22 @@
+# Docker 环境配置（docker-compose 自动加载）
+mode: dev
+secret: please-change-this-in-production-use-a-long-random-string
+level: 4
+port: 9765
+
+dataSource:
+  main: fing:fingpass@tcp(mysql:3306)/fing?charset=utf8mb4&parseTime=True&loc=Local
+
+redis:
+  addr: redis:6379
+
+es:
+  esUrl: ""
+  esUsername: ""
+  esPassword: ""
+
+email:
+  host: smtp.gmail.com
+  name: "fing App"
+  email: noreply@example.com
+  password: ""

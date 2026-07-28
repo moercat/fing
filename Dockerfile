@@ -1,45 +1,43 @@
-# 使用官方 Golang 镜像作为基础镜像
-FROM golang:1.19-alpine AS builder
+# fing Dockerfile — 多阶段构建，最终镜像只有二进制 + 配置
+#
+# 用法：
+#   docker build -t fing-app .
+#   docker compose up -d
 
-# 设置工作目录
+# ---- 构建阶段 ----
+FROM golang:1.21-alpine AS builder
+
 WORKDIR /app
 
-# 复制 go.mod 和 go.sum 文件
+# 单独缓存依赖
 COPY go.mod go.sum ./
-
-# 下载依赖
 RUN go mod download
 
-# 复制源代码
+# 复制源码
 COPY . .
 
-# 构建应用
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
+# 静态链接，最终镜像小
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-s -w" -o fing .
 
-# 使用官方 Alpine 镜像作为最终镜像
+# ---- 运行阶段 ----
 FROM alpine:latest
 
-# 安装 ca-certificates，以便应用可以连接到 HTTPS 端点
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates tzdata && \
+    adduser -D -s /bin/sh finguser
 
-# 创建非 root 用户
-RUN adduser -D -s /bin/sh appuser
+WORKDIR /app
 
-# 设置工作目录
-WORKDIR /root/
+COPY --from=builder /app/fing .
+COPY --from=builder /app/config.*.yaml ./
+COPY --from=builder /app/.env.example ./.env.example
 
-# 从构建阶段复制二进制文件
-COPY --from=builder /app/main .
+RUN chown -R finguser:finguser /app
+USER finguser
 
-# 复制配置文件
-COPY --from=builder /app/config.yaml .
-
-# 更改文件所有者
-RUN chown -R appuser:appuser /root/
-USER appuser
-
-# 暴露端口
 EXPOSE 9765
 
-# 启动应用
-CMD ["./main"]
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:9765/health || exit 1
+
+CMD ["./fing"]
