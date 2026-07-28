@@ -14,14 +14,20 @@ func InitRouter(r *gin.Engine) *gin.Engine {
 	// 公共路由，不需要认证
 	publicRouter(r)
 
-	// 中间件, 顺序不能改
-	r.Use(middleware.LoggerToFile(), middleware.Session(), middleware.Cover, middleware.Cors(), middleware.CurrentUser())
+	// 全局中间件（顺序重要）
+	r.Use(
+		middleware.TraceID(),                 // 1. 每个请求分配 TraceID
+		middleware.RateLimit(100, 1<<63-1),  // 2. IP 限流（默认关闭，main.go 配置）
+		middleware.LoggerToFile(),           // 3. 请求日志
+		middleware.Session(),                // 4. Session
+		middleware.Cover,                    // 5. Panic 恢复
+		middleware.Cors(),                   // 6. CORS
+		middleware.Audit(),                  // 7. 操作日志（审计）
+		middleware.CurrentUser(),            // 8. 当前用户
+	)
 
 	// 日常业务路由
 	normalRouter(r)
-
-	// 可以按照当前业务路由自定义自己的分组
-	// authRouter(r)
 
 	return r
 }
