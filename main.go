@@ -7,6 +7,7 @@ import (
 	"fing/pkg/config"
 	"fing/pkg/db"
 	"fing/pkg/entity/usr"
+	"fing/pkg/graceful"
 	"fmt"
 	"time"
 
@@ -27,11 +28,36 @@ func main() {
 	// 4. 启动定时任务调度器
 	cobra.Cobra()
 
-	// 5. 启动 HTTP 服务
+	// 5. 启动 HTTP 服务（优雅关闭）
 	addr := ":" + config.Config.Port
 	logger.Infof("fing listening on %s (mode=%s)", addr, config.Config.Mode)
-	if err := r.Run(addr); err != nil {
-		panic(err)
+	graceful.Run(graceful.Config{
+		Addr:    addr,
+		Handler: r,
+		Timeout: 30 * time.Second,
+		Cleanups: []func(){
+			closeDB,
+			closeRedis,
+		},
+	})
+}
+
+// closeDB 关闭 DB 连接
+func closeDB() {
+	sqlDB, err := db.Gain.DB()
+	if err != nil {
+		logger.Errorf("get sql.DB failed: %v", err)
+		return
+	}
+	if err := sqlDB.Close(); err != nil {
+		logger.Errorf("close DB failed: %v", err)
+	}
+}
+
+// closeRedis 关闭 Redis 连接
+func closeRedis() {
+	if err := db.RedisClient.Close(); err != nil {
+		logger.Errorf("close Redis failed: %v", err)
 	}
 }
 
@@ -45,12 +71,8 @@ func autoMigrate() {
 }
 
 // registerTasks 注册业务定时任务。
-// 在这里加你自己的定时任务，周期和函数都自己定。
 func registerTasks() {
-	// 示例：每 30 分钟清理一次过期的密码重置 token
-	// 你可以删掉这段，自己加任务
 	cobra.Register("cleanup-expired-tokens", 30*time.Minute, func() {
-		// 实现逻辑见 TUTORIAL.md 第 5 步
 		logger.Info("[task] cleanup expired tokens (skeleton, implement me)")
 	})
 }

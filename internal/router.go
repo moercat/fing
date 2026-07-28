@@ -8,6 +8,7 @@ import (
 	"fing/internal/apis/user"
 	"fing/pkg/health"
 	"fing/pkg/middleware"
+	"fing/pkg/swagger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,6 +38,9 @@ func InitRouter(r *gin.Engine) *gin.Engine {
 func publicRouter(r *gin.Engine) {
 	// 健康检查等公共接口
 	r.GET("/health", health.HealthCheck)
+
+	// Swagger UI
+	swagger.Register(r)
 }
 
 func normalRouter(r *gin.Engine) {
