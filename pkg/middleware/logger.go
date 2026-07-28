@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fing/log"
+	logger "fing/log"
 	"github.com/gin-gonic/gin"
 	"time"
 )
@@ -20,7 +20,7 @@ func LoggerToFile() gin.HandlerFunc {
 		statusCode := c.Writer.Status()
 		clientIP := c.ClientIP()
 
-		log.Infof("| %3d | %13v | %15s | %s | %s |",
+		logger.Infof("| %3d | %13v | %15s | %s | %s |",
 			statusCode,
 			latencyTime,
 			clientIP,

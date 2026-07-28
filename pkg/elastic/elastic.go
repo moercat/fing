@@ -3,7 +3,7 @@ package elastic
 import (
 	"context"
 	"errors"
-	"fing/log"
+	logger "fing/log"
 	"fing/pkg/db"
 	"fing/pkg/entity/usr"
 	"github.com/olivere/elastic/v7"
@@ -39,7 +39,7 @@ func (e *Elastic) DelUser(id ...string) {
 	for _, v := range id {
 		if _, err := db.EsClient.Delete().Index(e.Index).
 			Id(v).Do(ctx); err != nil {
-			log.Error("es删除用户ID:%v 信息失败:%v", v, err)
+			logger.Errorf("es删除用户ID:%v 信息失败:%v", v, err)
 			return
 		}
 	}
@@ -57,7 +57,7 @@ func (e *Elastic) AddUser(user *usr.UserInfo) {
 		Id(strconv.FormatInt(int64(user.ID), 10)).
 		Refresh("wait_for").BodyJson(user).Do(ctx)
 	if err != nil {
-		log.Error("es添加用户ID:%v 信息失败:%v", user.ID, err)
+		logger.Errorf("es添加用户ID:%v 信息失败:%v", user.ID, err)
 		return
 	}
 
@@ -73,7 +73,7 @@ func (e *Elastic) UpdateUser(id string, doc map[string]string) {
 	_, err := db.EsClient.Update().Index(e.Index).
 		Id(id).Doc(doc).Do(ctx)
 	if err != nil {
-		log.Error("es更新用户ID:%v 信息失败:%v", id, err)
+		logger.Errorf("es更新用户ID:%v 信息失败:%v", id, err)
 		return
 	}
 
