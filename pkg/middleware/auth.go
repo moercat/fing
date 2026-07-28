@@ -17,6 +17,8 @@ func CurrentUser() gin.HandlerFunc {
 			user, err := login.GetUser(uid)
 			if err == nil {
 				c.Set("user", &user)
+				c.Set("user_id", user.ID)
+				c.Set("user_role", user.Role)
 			}
 		}
 		c.Next()
@@ -27,13 +29,28 @@ func CurrentUser() gin.HandlerFunc {
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if user, _ := c.Get("user"); user != nil {
-			if _, ok := user.(*usr.UserInfo); ok {
+			if u, ok := user.(*usr.UserInfo); ok {
+				c.Set("user_id", u.ID)
+				c.Set("user_role", u.Role)
 				c.Next()
 				return
 			}
 		}
 
 		resp.Fail(c, nil, "未登录", 401)
+		c.Abort()
+	}
+}
+
+// AdminRequired 需要 admin 角色
+func AdminRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role, _ := c.Get("user_role")
+		if role == "admin" {
+			c.Next()
+			return
+		}
+		resp.Fail(c, nil, "需要管理员权限", 403)
 		c.Abort()
 	}
 }

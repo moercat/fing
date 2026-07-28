@@ -12,7 +12,8 @@ func (r *RouterLogin) Router(router *gin.Engine) {
 	{
 		v1.GET("ping", r.ping)
 		v1.POST("register", r.register)
-		v1.POST("login", r.login)
+		v1.POST("login", r.login)        // Session 登录
+		v1.POST("login/jwt", r.loginJWT) // JWT 登录（移动端/前后端分离）
 	}
 
 	v2 := router.Group("/api/v2")

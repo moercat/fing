@@ -4,7 +4,11 @@ import (
 	"fing/internal/model"
 	"fing/internal/service/login"
 	"fing/internal/tools"
+	"fing/pkg/config"
+	"fing/pkg/jwt"
 	"fing/pkg/resp"
+	"time"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -26,7 +30,7 @@ func (r *RouterLogin) register(c *gin.Context) {
 	resp.OK(c, nil, "")
 }
 
-// login 用户登录接口
+// login 用户登录接口（Session）
 func (r *RouterLogin) login(c *gin.Context) {
 	var sv model.Login
 	if err := c.ShouldBind(&sv); err != nil {
@@ -50,6 +54,33 @@ func (r *RouterLogin) login(c *gin.Context) {
 	}
 
 	resp.OK(c, usr, "")
+}
+
+// loginJWT 用户登录接口（JWT）— 适合前后端分离 / 移动端
+func (r *RouterLogin) loginJWT(c *gin.Context) {
+	var sv model.Login
+	if err := c.ShouldBind(&sv); err != nil {
+		resp.Fail(c, err, "参数错误")
+		return
+	}
+
+	usr, err := login.Login(&sv)
+	if err != nil {
+		resp.Fail(c, err, "")
+		return
+	}
+
+	token, err := jwt.Sign(config.Config.Secret, usr.ID, usr.UserName, usr.Role, 24*time.Hour)
+	if err != nil {
+		resp.Fail(c, err, "生成令牌失败")
+		return
+	}
+
+	resp.OK(c, gin.H{
+		"token":      token,
+		"expires_in": 86400,
+		"user":       usr,
+	}, "")
 }
 
 // userInfo 用户详情

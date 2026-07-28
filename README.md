@@ -1,230 +1,217 @@
 # fing
 
-Simple architecture, clear directory structure, giving users an unusual feeling
-
-简单的架构，清晰的目录结构，带给使用者非一般的感觉
+> Gin + GORM + Redis + Sessions/JWT 的用户中心后端模板
 
 ![Go Version](https://img.shields.io/badge/Go-1.21-blue)
 ![Gin](https://img.shields.io/badge/Gin-1.10-lightgrey)
-![Redis](https://img.shields.io/badge/Redis-go--redis-red)
 ![Gorm](https://img.shields.io/badge/Gorm-gorm.io-red)
-![Xorm](https://img.shields.io/badge/Xorm-xorm.io-red)
-![Elastic](https://img.shields.io/badge/Elastic-olivere-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 [![CI](https://github.com/moercat/fing/actions/workflows/go.yml/badge.svg)](https://github.com/moercat/fing/actions/workflows/go.yml)
+![Stars](https://img.shields.io/badge/Stars-46-brightgreen)
 
-## 项目介绍
+## 这是什么
 
-本项目是一个基于 Go 语言开发的 Web 应用程序，采用了一系列 Golang 中流行的组件，可以以本项目为基础快速搭建 Restful Web API。项目具备完整的用户认证系统，包括注册、登录、会话管理等功能。
+一个开箱即用的**用户中心**后端模板。覆盖注册、登录（Session + JWT 双模式）、密码重置、邮箱验证、RBAC 角色权限、资料修改、密码修改、头像修改。**复制即用**做你自己的业务后端。
+
+适合做：
+- 个人/中小团队的 Web 后端基座
+- 学习 Gin + GORM 的工程模板
+- 面试展示项目（覆盖常见后端能力）
 
 ## 功能特性
 
-1. **用户系统**：
-   - 用户注册（带密码确认验证，使用 bcrypt 加密）
-   - 用户登录认证（基于 Session）
-   - 用户信息查询
-   - 用户登出功能
+| 模块 | 能力 | 状态 |
+| --- | --- | --- |
+| 注册 | 邮箱+密码+昵称，bcrypt 加密 | ✅ |
+| 登录 | Session / JWT 双模式 | ✅ |
+| 登出 | 清空 Session | ✅ |
+| 资料 | 查看/修改昵称、邮箱、头像 | ✅ |
+| 密码 | 登录态修改 + 邮箱重置（30min token） | ✅ |
+| 邮箱验证 | 注册后验证邮箱 | ✅ |
+| 角色权限 | `user` / `admin` RBAC 中间件 | ✅ |
+| 健康检查 | `/health` | ✅ |
+| Redis 缓存 | session 存储 | ✅ |
+| MySQL 持久化 | GORM 1.25 | ✅ |
+| 邮件发送 | SMTP 客户端 | ✅ |
+| 结构化日志 | 自定义 logger + 文件输出 | ✅ |
+| 错误处理 | 统一错误码 + 响应包装 | ✅ |
+| CORS | 中间件 | ✅ |
+| API 文档 | 内联代码注释 | ✅ |
+| Swagger 自动生成 | — | ❌ 计划中 |
+| Elasticsearch 集成 | 高级搜索 | ❌ 未启用 |
+| XORM 接入 | — | ❌ 未启用（与 GORM 重复） |
+| 限流 | — | ❌ 计划中 |
 
-2. **技术集成**：
-   - [Gin](https://github.com/gin-gonic/gin): 轻量级高性能 Web 框架
-   - [GORM](https://gorm.io/index.html) 和 [XORM](https://xorm.io/index.html): ORM 工具，支持 MySQL
-   - [Go-Redis](https://github.com/go-redis/redis): Redis 客户端
-   - [Elasticsearch](https://github.com/olivere/elastic): 搜索引擎客户端
-   - [Gin-Sessions](https://github.com/gin-contrib/sessions): 会话管理
-   - [Configor](https://github.com/jinzhu/configor): 支持多种格式的配置管理
-   - [Cors](https://github.com/gin-contrib/cors): 跨域中间件
-   - [Gomail](https://github.com/go-gomail/gomail): 邮件发送功能
+## 快速开始
 
-3. **架构特色**：
-   - 清晰的分层架构（API 层、Service 层、Model 层、Entity 层）
-   - 完善的中间件体系（CORS、Session、Auth、Recover、Logger）
-   - 统一的响应格式封装
-   - 模块化的代码组织结构
-   - 标准化的错误处理机制
-   - 结构化日志记录
+### Docker 一键运行
+
+```bash
+# 1. 启动 MySQL + Redis
+docker compose up -d
+
+# 2. 启动服务
+go run main.go
+
+# 3. 注册用户
+curl -X POST http://localhost:9765/api/v1/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_name": "testuser",
+    "password": "testpass123",
+    "re_password": "testpass123",
+    "nickname": "测试用户",
+    "email": "test@example.com"
+  }'
+
+# 4. 登录获取 JWT
+curl -X POST http://localhost:9765/api/v1/login/jwt \
+  -H "Content-Type: application/json" \
+  -d '{"user_name":"testuser","password":"testpass123"}'
+```
+
+### 本地开发
+
+```bash
+# 1. 准备 MySQL + Redis
+mysql -u root -p -e "CREATE DATABASE fing DEFAULT CHARSET utf8mb4"
+
+# 2. 配置
+cp .env.example .env
+vim .env   # 填入你的 DB/Redis/SMTP 配置
+
+# 3. 启动
+go mod download
+go run main.go
+```
+
+服务默认监听 `:9765`，访问 `http://localhost:9765/health` 验证。
+
+## API 接口
+
+### 公开接口
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/health` | 健康检查 |
+| GET | `/api/v1/ping` | 服务存活 |
+| POST | `/api/v1/register` | 用户注册 |
+| POST | `/api/v1/login` | 登录（Session） |
+| POST | `/api/v1/login/jwt` | 登录（JWT） |
+| POST | `/api/v1/password/forgot` | 申请密码重置邮件 |
+| POST | `/api/v1/password/reset` | 用 token 重置密码 |
+| POST | `/api/v1/email/verify` | 验证邮箱 |
+
+### 需要登录（`/api/v2/*`）
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/v2/user_info` | 当前用户信息（Session） |
+| GET | `/api/v2/profile` | 获取资料 |
+| PUT | `/api/v2/profile` | 修改昵称/邮箱 |
+| PUT | `/api/v2/profile/password` | 修改密码 |
+| PUT | `/api/v2/profile/avatar` | 修改头像 |
+| DELETE | `/api/v2/logout` | 登出（Session） |
+
+### 需要 admin 角色
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/api/v2/users` | 用户列表 |
+| PUT | `/api/v2/users/:id/role` | 修改用户角色 |
+
+## 技术栈
+
+| 组件 | 选型 | 用途 |
+| --- | --- | --- |
+| Web 框架 | [Gin](https://github.com/gin-gonic/gin) 1.10 | 路由 / 中间件 |
+| ORM | [GORM](https://gorm.io) 1.25 | MySQL 持久化 |
+| 数据库 | MySQL 5.7+ | 主存储 |
+| 缓存 | Redis 6+ | Session 存储 |
+| 会话 | gin-contrib/sessions | Web 端 |
+| 鉴权 | golang-jwt/jwt v5 | API 端 |
+| 邮件 | go-gomail/gomail | 通知 |
+| 配置 | jinzhu/configor | YAML + 环境变量 |
+| 日志 | 自定义 logger | 结构化日志 |
+| 密码 | golang.org/x/crypto/bcrypt | 加密 |
 
 ## 目录结构
 
 ```
 fing/
-├── config*.yaml          # 配置文件
-├── go.mod/go.sum        # Go 依赖管理
-├── main.go              # 主程序入口
-├── Dockerfile           # Docker 配置文件
-├── docker-compose.yml   # Docker Compose 配置文件
-├── Makefile             # 构建和部署脚本
-├── APIDOC.md            # API 文档
-├── .env.example         # 环境变量示例
-├── internal/            # 内部业务代码
-│   ├── router.go        # 路由初始化
-│   ├── apis/            # API 接口实现
-│   │   └── login/       # 登录相关接口
-│   ├── model/           # 数据模型（序列化器）
-│   ├── service/         # 业务逻辑层
-│   └── tools/           # 工具函数
-├── pkg/                 # 公共包
-│   ├── cobra/           # 命令行工具（定时任务）
-│   ├── config/          # 配置管理
-│   ├── db/              # 数据库连接管理（MySQL、Redis、ES）
-│   ├── elastic/         # Elasticsearch 操作
-│   ├── email/           # 邮件功能
-│   ├── entity/          # 数据库实体模型
-│   ├── errors/          # 标准错误定义
-│   ├── health/          # 健康检查
-│   ├── middleware/      # 中间件（认证、CORS、Session等）
-│   ├── resp/            # 统一响应格式封装
-│   └── tools/           # 工具函数
-└── log/                 # 日志相关
+├── main.go                 ← 入口
+├── config.{dev,prod}.yaml  ← 配置文件
+├── .env.example            ← 环境变量模板
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── APIDOC.md               ← 接口详情
+├── examples/               ← 客户端示例
+│   ├── curl.sh             ← cURL 调用示例
+│   └── client.go           ← Go client 示例
+├── log/                    ← 自定义 logger
+└── internal/
+    ├── router.go           ← 路由注册
+    ├── apis/               ← HTTP handlers
+    │   ├── login/          ← 注册/登录/JWT
+    │   ├── user/           ← 资料/密码/角色
+    │   └── password/       ← 密码重置/邮箱验证
+    ├── service/            ← 业务逻辑
+    │   ├── login/
+    │   ├── user/
+    │   └── password/
+    ├── model/              ← 请求/响应序列化
+    └── tools/              ← 工具函数
+└── pkg/                    ← 可复用包
+    ├── jwt/                ← JWT 签发/解析
+    ├── middleware/         ← CORS/Auth/Logger/Recover
+    ├── resp/               ← 统一响应
+    ├── errors/             ← 统一错误
+    ├── db/                 ← MySQL + Redis 客户端
+    ├── email/              ← 邮件发送
+    ├── config/             ← 配置加载
+    ├── entity/usr/         ← 数据模型
+    ├── health/             ← 健康检查
+    └── cobra/              ← 定时任务
 ```
 
-## API 接口
+## 配置
 
-### 公共接口
-
-- `GET /health` - 服务健康检查
-- `GET /api/v1/ping` - 服务状态检查
-
-### 用户接口 (V1)
-
-- `POST /api/v1/register` - 用户注册
-- `POST /api/v1/login` - 用户登录
-
-### 用户接口 (V2) - 需要认证
-
-- `GET /api/v2/user_info` - 用户信息
-- `DELETE /api/v2/logout` - 用户登出
-
-## 环境配置
-
-项目依赖于 `configor`，根据环境变量加载配置文件。使用 `CONFIGOR_ENV` 设置环境变量，如果没有设置 `CONFIGOR_ENV`，框架将使用 `development` 作为默认环境，即读取 `config.development.yaml`。
-
-区分开发环境与生产环境的命令：
-```
-CONFIGOR_ENV=production go run main.go
-```
-
-### 配置文件说明
-
-配置文件示例 (`config.yaml`)：
+通过 `configor` 加载：
 
 ```yaml
-mode: dev          # 当前所在环境
-secret: your_secret_key  # session 加密密钥，不要使用默认值!
-level: 4          # 日志等级
-port: 9765        # 服务端口
+mode: dev                 # dev | prod
+secret: your-secret-key   # JWT/session 加密密钥（生产必须改）
+level: 4                  # 日志等级
+port: 9765
 
 dataSource:
-  main: you_name:you_password@tcp(you_ip:you_port)/db_name?charset=utf8mb4  # 数据库连接
+  main: user:pass@tcp(localhost:3306)/fing?charset=utf8mb4&parseTime=True&loc=Local
 
 redis:
-  addr: 127.0.0.1:6379  # Redis 连接地址
+  addr: localhost:6379
 
-es:  # Elasticsearch 连接配置
-  esUrl: you_es
-  esUsername: ""
-  esPassword: ""
-
-email:  # 邮件发送配置
-  host: smtp.exmail.qq.com
-  name: my_name
-  email: my_email
-  password: ""
+email:
+  host: smtp.gmail.com
+  name: "Your Name"
+  email: your@email.com
+  password: your-app-password
 ```
 
-## 快速开始
+生产环境务必：
+- 改 `secret` 为强随机字符串
+- 用 `CONFIGOR_ENV=production` 加载 `config.production.yaml`
+- 邮件密码用应用专用密码（Gmail/QQ 都需）
 
-### 开发环境准备
+## 路线图
 
-```bash
-# 1. 下载并安装 Go 1.16+
-# 2. 克隆项目
-git clone https://github.com/moercat/fing.git
-cd fing
-
-# 3. 安装依赖
-go mod tidy
-
-# 4. 复制环境变量文件
-cp .env.example .env
-
-# 5. 修改配置文件（config.yaml）连接到你的数据库等服务
-# 6. 启动服务
-go run main.go
-```
-
-### 使用 Docker 运行
-
-```bash
-# 构建并启动服务
-docker-compose up -d
-```
-
-### 使用 Makefile
-
-```bash
-# 构建项目
-make build
-
-# 运行项目
-make run
-
-# 运行测试
-make test
-
-# 构建生产环境二进制文件
-make build-prod
-
-# Docker 构建
-make docker-build
-
-# 使用 Docker Compose 启动
-make docker-up
-```
-
-## 构建部署
-
-### 本地构建
-
-Linux 环境下构建：
-```bash
-GOOS=linux GOARCH=amd64 go build -o fing
-```
-
-### Docker 部署
-
-```bash
-# 构建 Docker 镜像
-docker build -t fing-app .
-
-# 运行容器
-docker run -d -p 9765:9765 fing-app
-```
-
-## 项目特性
-
-1. **安全性**：
-   - 密码使用 bcrypt 加密存储
-   - 配置验证，防止使用默认安全密钥
-   - 完善的输入验证
-   - 会话安全设置
-
-2. **可维护性**：
-   - 清晰的分层架构
-   - 标准化的错误处理
-   - 统一的响应格式
-   - 详细的 API 文档
-
-3. **生产就绪**：
-   - 结构化日志记录
-   - 健康检查接口
-   - 容器化部署支持
-   - 性能监控
-
-4. **开发体验**：
-   - 基于 Makefile 的一键操作
-   - Docker 和 Docker Compose 支持
-   - 详细的文档和示例
+- [ ] Swagger 文档自动生成
+- [ ] 请求限流（按 IP / 按用户）
+- [ ] 单元测试覆盖（service 层）
+- [ ] Docker 镜像推送到 GHCR
+- [ ] 接入 ES 全文搜索
+- [ ] 接入 OAuth2（GitHub/Google 登录）
 
 ## 许可证
 
-MIT License
+MIT

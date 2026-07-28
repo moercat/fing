@@ -2,6 +2,8 @@ package internal
 
 import (
 	"fing/internal/apis/login"
+	"fing/internal/apis/password"
+	"fing/internal/apis/user"
 	"fing/pkg/health"
 	"fing/pkg/middleware"
 	"github.com/gin-gonic/gin"
@@ -30,7 +32,7 @@ func publicRouter(r *gin.Engine) {
 }
 
 func normalRouter(r *gin.Engine) {
-
 	new(login.RouterLogin).Router(r)
-
+	new(user.RouterUser).Router(r)
+	new(password.RouterPassword).Router(r)
 }
